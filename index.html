@@ -657,13 +657,12 @@
 
                 if (musicHint && music) {
                     musicHint.addEventListener('click', function(e) {
-                        alert('按钮被点击了！'); // 临时添加这行
                         e.stopPropagation();
                         if (!isMusicPlaying) {
                             music.play().then(() => {
                                 isMusicPlaying = true;
                                 musicIcon.textContent = '🔊';
-                                musicText.textContent = '音乐播放中';
+                                musicText.textContent = '额吉的歌';
                                 setTimeout(() => {
                                     musicHint.style.opacity = '0.6';
                                     musicHint.style.transform = 'scale(0.9)';
