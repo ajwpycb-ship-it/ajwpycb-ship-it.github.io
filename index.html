@@ -505,8 +505,38 @@
 <body>
     <div class="bg-petals" id="bgPetals"></div>
     <div class="toast-message" id="toastMessage">💐 花束已送达！愿妈妈永远被爱与幸福包围～</div>
+    <!-- 背景音乐（默认不播放） -->
+    <audio id="bgMusic" preload="auto" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
-    <div class="scene">
+    <!-- 浮动音乐提示按钮（初始隐藏） -->
+    <div id="musicHint" style="
+        position: fixed;
+        bottom: 30px;
+        right: 20px;
+        z-index: 300;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 12px 20px;
+        box-shadow: 0 4px 20px rgba(180,100,110,0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        color: #c05560;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+        pointer-events: none;
+        font-family: 'PingFang SC', 'Noto Serif SC', 'KaiTi', '楷体', serif;
+    ">
+        <span id="musicIcon">🎵</span>
+        <span id="musicText">点我播放音乐</span>
+    </div>
+        <div class="scene">
         <div class="envelope-wrapper" id="envelopeWrapper" title="点击打开信封">
             <div class="envelope-body">
                 <div class="envelope-inner-visible"></div>
@@ -585,7 +615,6 @@
                 }
                 bgPetals.appendChild(frag);
             }
-
             function openEnvelope() {
                 if (isOpened) return;
                 isOpened = true;
@@ -594,6 +623,16 @@
                 setTimeout(() => {
                     letterContainer.classList.add('revealed');
                 }, 300);
+
+                // 信纸出现后，展示音乐按钮
+                setTimeout(() => {
+                    var musicHint = document.getElementById('musicHint');
+                    if (musicHint) {
+                        musicHint.style.opacity = '1';
+                        musicHint.style.transform = 'translateY(0)';
+                        musicHint.style.pointerEvents = 'auto';
+                    }
+                }, 1200);
             }
 
             function sendFlowers() {
@@ -608,7 +647,49 @@
                 }, 400);
                 createPetalRain();
             }
+            // 音乐按钮交互
+            (function() {
+                var music = document.getElementById('bgMusic');
+                var musicHint = document.getElementById('musicHint');
+                var musicIcon = document.getElementById('musicIcon');
+                var musicText = document.getElementById('musicText');
+                var isMusicPlaying = false;
 
+                if (musicHint && music) {
+                    musicHint.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (!isMusicPlaying) {
+                            music.play().then(() => {
+                                isMusicPlaying = true;
+                                musicIcon.textContent = '🔊';
+                                musicText.textContent = '音乐播放中';
+                                setTimeout(() => {
+                                    musicHint.style.opacity = '0.6';
+                                    musicHint.style.transform = 'scale(0.9)';
+                                    musicHint.style.bottom = '20px';
+                                }, 5000);
+                            }).catch(err => {
+                                console.log('播放失败:', err);
+                            });
+                        } else {
+                            if (music.paused) {
+                                music.play();
+                                musicIcon.textContent = '🔊';
+                                musicText.textContent = '音乐播放中';
+                            } else {
+                                music.pause();
+                                musicIcon.textContent = '🎵';
+                                musicText.textContent = '已暂停，点击继续';
+                            }
+                        }
+                    });
+
+                    musicHint.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        musicHint.click();
+                    });
+                }
+            })();
             function createPetalRain() {
                 const emojis = ['🌸','🌷','💮','🌺','🌼','💐','🌹','💖'];
                 const frag = document.createDocumentFragment();
